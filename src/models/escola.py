@@ -50,20 +50,18 @@ class Escola:
         qtd_alunos = 0
         
         for turma in self._turmas_existentes:
-            turma: Turma 
-
+             
             # Percorre os alunos daquela turma específica
             for aluno in turma.alunos_matriculados:
-                # Avisa ao editor que 'aluno' é um objeto da classe Aluno
-                aluno: Aluno 
-                total_percentual += aluno.ver_frequencia() 
+                # Avisa ao editor que 'aluno' é um objeto da classe Aluno 
+                total_percentual += aluno.frequencia() 
                 qtd_alunos += 1
         
         # Evita divisão por zero se não houver alunos
         if qtd_alunos == 0:
             return 0.0
-            
-        return total_percentual / qtd_alunos
+        media_geral = total_percentual / qtd_alunos   
+        return round(media_geral,2)
     
     def atualizar_locacao(self):
         "Verifica se todos os professores da escola estão alocados em pelo menos uma turma."
