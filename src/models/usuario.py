@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
 import re
 from datetime import datetime
-import json
-import os
 
 """
 Representa a entidade base para todos os usuários do sistema StudyForge. 
@@ -51,16 +49,13 @@ class Usuario(ABC):
     @cpf.setter
     def cpf(self, valor):
         if not isinstance(valor, str):
-            raise TypeError("Erro: O cpf deve ser uma string!")
+            raise TypeError("Erro: O CPF deve ser uma string!")
         
-        cpf_limpo = valor.replace(".", "").replace("-", "")
+        cpf_limpo = re.sub(r'\D', '', valor)
 
-        if not cpf_limpo.isdigit():
-            raise ValueError("Erro: O cpf só pode conter números!")
         if len(cpf_limpo) != 11:
-            raise ValueError("Erro: O cpf tem que conter 11 dígitos!")
-        else:
-            self._cpf = cpf_limpo
+            raise ValueError("Erro: O CPF deve conter exatamente 11 dígitos numéricos!")
+        self._cpf = cpf_limpo
 
     @property
     def email(self):
@@ -193,49 +188,3 @@ class Usuario(ABC):
             "data_nascimento": self.data_nascimento,
             "status": self._status
         }
-
-    def salvar_json(self):
-        nome_base = f"{self.__class__.__name__.lower()}s.json"
-        diretorio_atual = os.path.dirname(os.path.abspath(__file__))
-        caminho_db = os.path.join(diretorio_atual, "..", "database", nome_base)
-
-        dados_lista = []
-
-        if os.path.exists(caminho_db):
-            try: 
-                with open(caminho_db, "r", encoding="utf-8") as arq:
-                    dados_lista = json.load(arq)
-            except (json.JSONDecodeError, IOError):
-                dados_lista = []
-
-        usuario_existente = next((u for u in dados_lista if u.get("cpf") == self._cpf), None)
-
-        if usuario_existente:
-
-            self._id = usuario_existente["id"]
-        else:
-
-            if dados_lista:
-                maior_id = max(u.get("id", 0) for u in dados_lista)
-                self._id = maior_id + 1
-            else:
-
-                self._id = 1
-
-        dados_atualizados = self.to_dict()
-        encontrado = False
-        for i, usuario_no_arquivo in enumerate(dados_lista):
-            if usuario_no_arquivo.get("cpf") == self._cpf:
-                dados_lista[i] = dados_atualizados
-                encontrado = True
-                break
-        
-        if not encontrado:
-            dados_lista.append(dados_atualizados)
-
-        try:
-            with open(caminho_db, "w", encoding="utf-8") as arq:
-                json.dump(dados_lista, arq, indent=4, ensure_ascii=False)
-            print(f"✅ Sucesso: {self.nome} (ID: {self._id}) salvo em 'database/{nome_base}'.")
-        except Exception as e:
-            print(f"❌ Erro ao escrever no arquivo {caminho_db}: {e}")
