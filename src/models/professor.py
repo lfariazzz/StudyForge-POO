@@ -1,4 +1,3 @@
-from __future__ import annotations
 from src.models.usuario import Usuario
 import re
 
@@ -11,13 +10,12 @@ class Professor(Usuario):
                  registro_funcional, escola_associada, titulacao, area_atuacao, 
                  salario, status=True):
         super().__init__(nome, cpf, email, senha, telefone, data_nascimento, status)
-
         self.registro_funcional = registro_funcional
         self.escola_associada = escola_associada
         self.titulacao = titulacao
         self.area_atuacao = area_atuacao
         self.salario = salario
-        self.turmas_associadas: list[Turma] = []
+        self.turmas_associadas = []
 
     #-----------------
     #GETTERS E SETTERS
@@ -118,17 +116,74 @@ class Professor(Usuario):
         """Retorna as permissões específicas do professor no sistema."""
         return "Professor: Acesso a diários de classe, frequências e materiais didáticos."
     
-    def realizar_chamada(self, turma: Turma, data: str, presencas: list):
-        """Registra a presença dos alunos em uma turma específica."""
-        id_t = turma.id_turma if hasattr(turma, 'id_turma') else turma
-        print(f"✅ Chamada registrada pelo(a) Prof. {self.nome} para a Turma {id_t} em {data}.")
+    def realizar_chamada(self, turma, data: str, lista_presencas: list[dict]):
+        """
+        RN02: Registra a presença dos alunos com verificação de permissão.
+        """
+        if turma not in self.turmas_associadas:
+            print(f"❌ Erro de Permissão: O professor {self.nome} não pode realizar chamada na turma {getattr(turma, 'nome', 'desconhecida')} (não vinculada).")
+            return
 
-    def enviar_material(self, turma: Turma, material: Material):
-        """Associa um material didático a uma turma."""
-        nome_m = material.titulo if hasattr(material, 'titulo') else material
-        print(f"📚 Material '{nome_m}' enviado para a turma.")
+        if not hasattr(turma, 'alunos_matriculados'):
+            print("❌ Erro: Objeto turma inválido ou sem lista de alunos.")
+            return
+
+        if not lista_presencas:
+            print("⚠️ Aviso: Nenhuma presença enviada para registro.")
+            return
+
+        for registro in lista_presencas:
+            aluno = registro.get("aluno")
+            status = registro.get("presente")
+            
+            if aluno and hasattr(aluno, 'registrar_presenca'):
+                aluno.registrar_presenca(data, status)
+        
+        turma.registrar_aula(data, f"Chamada realizada pelo Prof. {self.nome}")
+        print(f"✅ Chamada concluída para a Turma {turma.nome} na data {data}.")
+
+    def postar_conteudo(self, turma, data: str, conteudo: str):
+        """
+        Associa o conteúdo lecionado ao diário de classe da turma.
+        """
+        if hasattr(turma, 'registrar_aula'):
+            sucesso = turma.registrar_aula(data, conteudo)
+            if sucesso:
+                print(f"📖 Conteúdo postado com sucesso na turma {getattr(turma, 'nome', 'desconhecida')}.")
+        else:
+            print("Erro: Não foi possível acessar o diário desta turma.")
+
+    def lancar_nota(self, aluno, disciplina: str, nota: float):
+    # Verificação automática de permissão (RN01)
+        if aluno.turma_associada not in self.turmas_associadas:
+            print(f"❌ Erro de Permissão: O professor {self.nome} não leciona para a turma {aluno.turma_associada.nome if hasattr(aluno.turma_associada, 'nome') else 'desconhecida'}.")
+            return
+
+        if not isinstance(nota, (int, float)) or not (0 <= nota <= 10):
+            print("❌ Erro: A nota deve ser entre 0 e 10.")
+            return
+
+        if hasattr(aluno, '_notas'):
+            aluno._notas[disciplina] = nota
+            print(f"⭐ Nota {nota} lançada para {aluno.nome} em {disciplina}.")
+
+    def enviar_material(self, turma, titulo: str, link_ou_conteudo: str):
+        """
+        Disponibiliza material de estudo para a turma.
+        """
+        if hasattr(turma, 'adicionar_material'):
+            material = {
+                "professor": self.nome,
+                "titulo": titulo,
+                "conteudo": link_ou_conteudo
+            }
+            turma.adicionar_material(material)
+            print(f"📚 Material '{titulo}' enviado para a turma {getattr(turma, 'nome', 'desconhecida')}.")
+        else:
+            print("❌ Erro: A turma não possui repositório de materiais.")
 
     def to_dict(self):
+        """Transforma dados do Professor em dicionário."""
         dados = super().to_dict() 
         
         id_esc = self.escola_associada.id_escola if hasattr(self.escola_associada, 'id_escola') else self.escola_associada
@@ -144,31 +199,15 @@ class Professor(Usuario):
         return dados
     
     def exibir_perfil(self):
-        """Exibe os dados formatados do professor (Útil para verificar os Setters)."""
-        print("\n" + "="*30)
-        print(f"PERFIL DO PROFESSOR: {self.nome}")
-        print("="*30)
+        """Exibe os dados formatados do professor."""
+        print("\n" + "="*40)
+        print(f"🍎 PERFIL DO PROFESSOR: {self.nome}")
+        print("="*40)
         print(f"RF:         {self.registro_funcional}")
         print(f"Titulação:  {self.titulacao}")
         print(f"Área:       {self.area_atuacao}")
         print(f"E-mail:     {self.email}")
         print(f"Salário:    R$ {self.salario:.2f}")
+        print(f"Turmas:     {', '.join([t.nome if hasattr(t, 'nome') else str(t) for t in self.turmas_associadas]) or 'Nenhuma'}")
         print(f"Status:     {'Ativo' if self.status else 'Inativo'}")
-        print("="*30 + "\n")
-
-    def enviar_mensagem(self, destinatario: Usuario, mensagem: str):
-        """Envia uma mensagem para outro usuário do sistema."""
-        nome_dest = destinatario.nome if hasattr(destinatario, 'nome') else "Usuário"
-        print(f"✉️ Mensagem enviada de {self.nome} para {nome_dest}: {mensagem}")
-
-    def enviar_solicitacao(self, gestor: Usuario, tipo_solicitacao: str):
-        """Envia solicitações (ex: férias, material) para o Gestor/Secretário."""
-        print(f"📝 Solicitação de '{tipo_solicitacao}' enviada pelo Prof. {self.nome} para análise.")
-
-    def consultar_turmas(self) -> list:
-        """Retorna a lista de turmas que o professor leciona."""
-        if not self.turmas_associadas:
-            print(f"ℹ️ O professor {self.nome} ainda não possui turmas vinculadas.")
-            return []
-        
-        return [t.nome if hasattr(t, 'nome') else t for t in self.turmas_associadas]
+        print("="*40 + "\n")
