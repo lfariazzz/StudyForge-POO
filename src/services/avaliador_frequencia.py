@@ -5,6 +5,7 @@ from src.core.configuracoes import Configuracoes
 from datetime import date 
 from src.models.turma import Turma
 from src.models.aluno import Aluno
+from src.models.demanda_pedagogica import DemandaPedagogica
 
 class AvaliadorFrequencia:
     def __init__(self):
@@ -12,7 +13,7 @@ class AvaliadorFrequencia:
         self.frequencia_minima = config.FREQUENCIA_MINIMA
 
     """Método para cálculo da validação da frequência do aluno 
-    EM ESPERA: Depende da classe aluno(atributo presenca) e da classe turma(atributo de aulas)"""
+    EM ESPERA: Depende da classe turma(atributo diario_de_classe)"""
     def aulas_mes_turma(self, turma, mes):
         total_aulas_mes = 0
         for aula in turma._diario_de_classe:
@@ -20,7 +21,9 @@ class AvaliadorFrequencia:
                 total_aulas_mes += 1
 
         return total_aulas_mes
-        
+    
+
+    """EM ESPERA: Depende da classe aluno(atributo presenca)"""
     def presencas_mes_aluno(self, aluno, mes):
         total_presencas_mes_aluno = 0
         for presenca in aluno.presenca:
@@ -45,4 +48,11 @@ class AvaliadorFrequencia:
         if total_alunos != 0:
             return somatorio_media_alunos / total_alunos
         else:
-            raise ValueError ("Não existem aulas registradas")
+            raise ValueError ("Não existem alunos registradas")
+        
+    def verificar_media_frequencia_mensal(self, turma, mes):
+        media_mensal = self.media_presenca_mensal_turma(turma, mes)
+        if media_mensal < self.frequencia_minima:
+            print(f"Média de presença mensal da turma {media_mensal}\n Gerando demanda pedagógica...")
+            """EM ESPERA: Depende da classe DemandaFactory"""
+            demanda_evasao = DemandaPedagogica()
