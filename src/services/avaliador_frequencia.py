@@ -16,7 +16,7 @@ class AvaliadorFrequencia:
         return total_aulas_mes
     
 
-    """EM ESPERA: Depende da classe aluno(atributo presenca)"""
+    """Calcula a quantidade de presenças no mês de um aluno"""
     def presencas_mes_aluno(self, aluno, mes):
         total_presencas_mes_aluno = 0
         for presenca in aluno.presenca:
@@ -31,7 +31,8 @@ class AvaliadorFrequencia:
             return (self.presencas_mes_aluno(aluno, mes)) / aulas_mes_turma
         else:
             raise ValueError ("Não existem aulas registradas")
-        
+
+    """Calcula presença média da turma em um mês"""
     def media_presenca_mensal_turma(self, turma, mes):
         total_alunos = len(turma._alunos_matriculados)
         somatorio_media_alunos = 0
@@ -42,7 +43,8 @@ class AvaliadorFrequencia:
             return somatorio_media_alunos / total_alunos
         else:
             raise ValueError ("Não existem alunos registradas")
-        
+
+    """Calcula a quantidade de alunos que ficaram com presença abaixo da mínima em um mês"""
     def qtd_alunos_abaixo_media_frequencia(self, turma, mes):
         qtd_media_abaixo = 0
         for aluno in turma._alunos_matriculados:
@@ -50,7 +52,8 @@ class AvaliadorFrequencia:
                 qtd_media_abaixo +=1
         return qtd_media_abaixo
             
-        
+    """Valida a RN02, verificando a media de frequencia mensal da turma e 
+    gerando uma demanda automaticamente caso esteja abaixo do limite"""   
     def verificar_media_frequencia_mensal(self, turma, mes):
         media_mensal = self.media_presenca_mensal_turma(turma, mes)
         if media_mensal < self.frequencia_minima:
