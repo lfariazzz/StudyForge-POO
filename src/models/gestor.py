@@ -59,7 +59,7 @@ class Gestor(Usuario):
         print(f"Email:               {self.email}")
         print(f"Telefone:            {self.telefone}")
         print(f"Escola Associada:    {Escola.nome}")
-        print(f"Status:              {self.status}")
+        print(f"Status:              {'ATIVO' if self.status else 'INATIVO'}")
         print("="*40 + "\n")
 
     def ver_estatisticas(self):
