@@ -1,4 +1,5 @@
 from src.models.usuario import Usuario
+from datetime import date
 import re
 
 """
@@ -116,7 +117,8 @@ class Professor(Usuario):
         """Retorna as permissões específicas do professor no sistema."""
         return "Professor: Acesso a diários de classe, frequências e materiais didáticos."
     
-    def realizar_chamada(self, turma, data: str, lista_presencas: list[dict]):
+    #Refatorado para atender ao RN02 
+    def realizar_chamada(self, turma, data: date, lista_presencas: list[dict]):
         """
         RN02: Registra a presença dos alunos com verificação de permissão.
         """

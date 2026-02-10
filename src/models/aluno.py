@@ -1,4 +1,5 @@
 from src.models.usuario import Usuario
+from datetime import date
 import re
 """
 Representa a entidade Aluno conforme o diagrama UML.
@@ -54,7 +55,14 @@ class Aluno(Usuario):
             self._turma_associada = None
         else:
             raise ValueError("Erro: turma_associada deve ser um objeto Turma ou uma string identificadora.")
-        
+
+    #implementado por Levi para integração com o src/services/avaliador_frequencia.py (RN02)    
+    @property
+    def presenca(self):
+        return self._historico_frequencia
+
+
+    #requer refatoração, ass:Levi 
     @property
     def frequencia(self):
         """
@@ -143,14 +151,15 @@ class Aluno(Usuario):
         if not avisos:
             print("Nenhuma notícia nova.")
 
-
-    def registrar_presenca(self, data: str, presente: bool):
+    #refatorado por Levi para implementação da RN02
+    def registrar_presenca(self, data: date, presente: bool):
         """Alimenta o histórico (Data e Booleano)."""
         if not isinstance(presente, bool):
             raise TypeError("O status de presença deve ser True ou False.")
         
         self._historico_frequencia.append({
             "data": data,
+            "aluno": self.nome,
             "presenca": presente
         })
 
