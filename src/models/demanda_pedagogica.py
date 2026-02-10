@@ -1,4 +1,4 @@
-from models.demanda import Demanda 
+from src.models.demanda import Demanda 
 
 class DemandaPedagogica(Demanda):
     """
