@@ -1,12 +1,5 @@
-# TODO: Integrar com os atributos finais de Aluno e Turma 
-    # (Aguardando implementação de aluno.presenca e turma._diario_de_classe)
-
 from src.core.configuracoes import Configuracoes
-from datetime import date 
-from src.models.turma import Turma
-from src.models.aluno import Aluno
-from src.models.demanda_pedagogica import DemandaPedagogica
-
+from src.core.demanda_factory import DemandaFactory
 class AvaliadorFrequencia:
     def __init__(self):
         config = Configuracoes()
@@ -50,9 +43,19 @@ class AvaliadorFrequencia:
         else:
             raise ValueError ("Não existem alunos registradas")
         
+    def qtd_alunos_abaixo_media_frequencia(self, turma, mes):
+        qtd_media_abaixo = 0
+        for aluno in turma._alunos_matriculados:
+            if self.media_presenca_mensal_aluno(aluno, turma, mes) < self.frequencia_minima:
+                qtd_media_abaixo +=1
+        return qtd_media_abaixo
+            
+        
     def verificar_media_frequencia_mensal(self, turma, mes):
         media_mensal = self.media_presenca_mensal_turma(turma, mes)
         if media_mensal < self.frequencia_minima:
             print(f"Média de presença mensal da turma {media_mensal}\n Gerando demanda pedagógica...")
-            """EM ESPERA: Depende da classe DemandaFactory"""
-            demanda_evasao = DemandaPedagogica()
+            alunos_abaixo_media = self.qtd_alunos_abaixo_media_frequencia(turma, mes)
+            demanda_evasao = DemandaFactory.criar_demanda("PEDAGOGICA", "SISTEMA", None, turma=turma, 
+                                               media_mensal=media_mensal, alunos_abaixo_media=alunos_abaixo_media)
+            return demanda_evasao
