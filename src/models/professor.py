@@ -141,7 +141,7 @@ class Professor(Usuario):
             if aluno and hasattr(aluno, 'registrar_presenca'):
                 aluno.registrar_presenca(data, status)
         
-        turma.registrar_aula(data, f"Chamada realizada pelo Prof. {self.nome}")
+        turma.registrar_aula(self, data, f"Chamada realizada pelo Prof. {self.nome}")
         print(f"✅ Chamada concluída para a Turma {turma.nome} na data {data}.")
 
     def postar_conteudo(self, turma, data: str, conteudo: str):

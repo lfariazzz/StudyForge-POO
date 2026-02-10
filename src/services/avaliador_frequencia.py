@@ -20,7 +20,7 @@ class AvaliadorFrequencia:
     def presencas_mes_aluno(self, aluno, mes):
         total_presencas_mes_aluno = 0
         for presenca in aluno.presenca:
-            if presenca["data"].month == mes:
+            if presenca["data"].month == mes and presenca["presenca"] is True:
                 total_presencas_mes_aluno += 1
 
         return total_presencas_mes_aluno
@@ -59,6 +59,6 @@ class AvaliadorFrequencia:
         if media_mensal < self.frequencia_minima:
             print(f"Média de presença mensal da turma {media_mensal}\n Gerando demanda pedagógica...")
             alunos_abaixo_media = self.qtd_alunos_abaixo_media_frequencia(turma, mes)
-            demanda_evasao = DemandaFactory.criar_demanda("PEDAGOGICA", "SISTEMA", None, turma=turma, 
+            demanda_evasao = DemandaFactory.criar_demanda("PEDAGOGICA", "SISTEMA", None,turma=turma, 
                                                media_mensal=media_mensal, alunos_abaixo_media=alunos_abaixo_media)
             return demanda_evasao
