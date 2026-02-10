@@ -12,8 +12,8 @@ class AvaliadorFrequencia:
         config = Configuracoes()
         self.frequencia_minima = config.FREQUENCIA_MINIMA
 
-    """Método para cálculo da validação da frequência do aluno 
-    EM ESPERA: Depende da classe turma(atributo diario_de_classe)"""
+    """Método para cálculo da quantidade de aulas em um mês de uma turma,
+    permitindo saber a presença individual e coletiva mensal."""
     def aulas_mes_turma(self, turma, mes):
         total_aulas_mes = 0
         for aula in turma._diario_de_classe:
